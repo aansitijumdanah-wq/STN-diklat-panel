@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Akses Per Batch - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{{ url_for('main.admin_dokumen') }}" class="btn btn-secondary mb-3">
+                ← Kembali ke Dashboard Dokumen
+            </a>
+            <h1>👥 Kelola Akses Dokumen Per Batch/Grup</h1>
+            <p class="text-muted">Berikan atau cabut akses Dokumen Bengkel untuk seluruh peserta dalam satu batch</p>
+            <hr>
+        </div>
+    </div>
+
+    {% if batches %}
+    {% for batch in batches %}
+    <div class="row mb-4" id="batch-{{ batch.id }}">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>
+                        <strong>{{ batch.nama }}</strong>
+                        {% if batch_access_dict.get(batch.id) %}
+                            {% if batch_access_dict[batch.id].is_aktif() %}
+                                <span class="badge badge-success">✅ Akses Aktif</span>
+                            {% else %}
+                                <span class="badge badge-danger">❌ Akses Tidak Aktif</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge badge-secondary">⭕ Belum Diberikan</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form onsubmit="grantBatchAccess(event, '{{ batch.id }}')">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Status Akses</strong></label>
+                                    <select class="form-control" id="grant-{{ batch.id }}" required>
+                                        <option value="true">✅ Berikan Akses</option>
+                                        <option value="false">❌ Cabut Akses</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><strong>Tanggal Kadaluarsa (Opsional)</strong></label>
+                                    <input type="date" class="form-control" id="expiry-{{ batch.id }}" 
+                                           placeholder="Kosongkan jika akses selamanya">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><strong>Catatan/Alasan</strong></label>
+                            <textarea class="form-control" id="catatan-{{ batch.id }}" 
+                                      rows="2" placeholder="Masukkan catatan (opsional)"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="btn-submit-{{ batch.id }}">
+                            <i class="fas fa-save"></i> Simpan Perubahan
+                        </button>
+
+                        <div id="result-{{ batch.id }}" class="mt-3"></div>
+                    </form>
+
+                    <!-- Current Access Info -->
+                    {% if batch_access_dict.get(batch.id) %}
+                    <div class="card mt-4 bg-light">
+                        <div class="card-header">
+                            <h6>📋 Informasi Akses Saat Ini</h6>
+                        </div>
+                        <div class="card-body">
+                            {% set access = batch_access_dict[batch.id] %}
+                            <p><strong>Diberikan:</strong> 
+                                {% if access.akses_diberikan %}
+                                    <span class="badge badge-success">Ya</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Tidak</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Tanggal Mulai:</strong> {{ access.tanggal_mulai.strftime('%d/%m/%Y %H:%M') }}</p>
+                            <p><strong>Kadaluarsa:</strong> 
+                                {% if access.tanggal_kadaluarsa %}
+                                    {{ access.tanggal_kadaluarsa.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                    <em>Selamanya</em>
+                                {% endif %}
+                            </p>
+                            {% if access.catatan %}
+                            <p><strong>Catatan:</strong> {{ access.catatan }}</p>
+                            {% endif %}
+                            <p><strong>Terakhir Diubah:</strong> {{ access.tanggal_diubah.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% else %}
+    <div class="alert alert-info">
+        <strong>ℹ️ Tidak ada batch/grup yang aktif</strong><br>
+        Silakan buat batch/grup terlebih dahulu di menu <a href="{{ url_for('main.admin_grup') }}">Kelola Grup</a>.
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.alert {
+    border-radius: 4px;
+}
+</style>
+
+<script>
+function grantBatchAccess(event, batchId) {
+    event.preventDefault();
+
+    const grantSelect = document.getElementById(`grant-${batchId}`);
+    const expiryInput = document.getElementById(`expiry-${batchId}`);
+    const catatanInput = document.getElementById(`catatan-${batchId}`);
+    const submitBtn = document.getElementById(`btn-submit-${batchId}`);
+    const resultDiv = document.getElementById(`result-${batchId}`);
+
+    const grant = grantSelect.value === 'true';
+    const tanggalKadaluarsa = expiryInput.value;
+    const catatan = catatanInput.value;
+
+    // Show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+    resultDiv.innerHTML = '';
+
+    fetch('{{ url_for("main.admin_grant_batch_access") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            batch_id: batchId,
+            grant: grant,
+            tanggal_kadaluarsa: tanggalKadaluarsa,
+            catatan: catatan
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultDiv.innerHTML = `<div class="alert alert-success">✅ ${data.message}</div>`;
+            // Reload page after 2 seconds
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            resultDiv.innerHTML = `<div class="alert alert-danger">❌ Error: ${data.error}</div>`;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        resultDiv.innerHTML = `<div class="alert alert-danger">❌ Terjadi kesalahan: ${error}</div>`;
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+    });
+}
+</script>
+{% endblock %}

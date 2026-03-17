@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Diklat Smart Tuning Nusantara</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #e4edf9);
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        header {
+            background: #1a3a6c;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 1.8rem;
+        }
+        .content {
+            padding: 30px;
+        }
+        .syarat {
+            margin-bottom: 30px;
+        }
+        .syarat h2 {
+            color: #1a3a6c;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e6f0;
+        }
+        .syarat ol {
+            padding-left: 20px;
+            line-height: 1.7;
+        }
+        .syarat li {
+            margin-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .checkbox-group input {
+            width: auto;
+            margin-top: 4px;
+        }
+        .btn {
+            background: #2a5298;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #1a3a6c;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #2a5298;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .highlight {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .password-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        @media (max-width: 600px) {
+            .container { margin: 10px; }
+            header { padding: 20px 15px; }
+            header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 Pendaftaran Diklat Smart Tuning Nusantara</h1>
+        </header>
+
+        <div class="content">
+            <div class="syarat">
+                <h2>Syarat Mengikuti Diklat</h2>
+                <ol>
+                    <li>Bersedia mengikuti tata tertib Diklat Zoom.</li>
+                    <li>Mengerti dasar sistem EFI / sensor-sensor dan <strong>memiliki scantool di bengkel</strong> serta bisa mengoperasikannya.</li>
+                    <li>Bersedia membayar iuran <span class="highlight">Rp 350.000/bulan</span>, dengan 2 kali pertemuan per minggu (Senin & Kamis, <strong>20.00–21.30 WIB</strong>).</li>
+                    <li>Kami menyediakan buku pembelajaran yang disusun oleh Pak Junisra Syam dengan biaya cetak <span class="highlight">Rp 450.000</span> (opsional).</li>
+                    <li>Bersedia melanjutkan diklat ke materi lanjutan: <strong>Immobilizer, Keyless Entry, CAN Bus, dan Hybrid</strong>.</li>
+                    <li>Kami menyelenggarakan <strong>KOPDAR (opsional)</strong> di <strong>Kuningan, Jawa Barat</strong> sebagai evaluasi akhir (berupa tes langsung) dan penyerahan sertifikat. Termasuk akses ke materi terbatas & website workshop manual. Biaya: <span class="highlight">Rp 3.500.000</span> (bisa dicicil).</li>
+                </ol>
+            </div>
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div style="color: #e74c3c; background: #ffeaea; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+                        {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/register">
+                <!-- CSRF token -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-group">
+                    <label for="nama">NAMA :</label>
+                    <input type="text" id="nama" name="nama" required placeholder="Contoh: Budi Santoso" value="{{ nama or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="alamat">ALAMAT :</label>
+                    <input type="text" id="alamat" name="alamat" required placeholder="Lengkap dengan kota/kabupaten" value="{{ alamat or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp">NOMOR HANDPHONE :</label>
+                    <input type="text" id="whatsapp" name="whatsapp" required placeholder="081234567890" value="{{ whatsapp or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="nama_bengkel">NAMA BENGKEL :</label>
+                    <input type="text" id="nama_bengkel" name="nama_bengkel" required placeholder="Nama bengkel tempat Anda bekerja" value="{{ nama_bengkel or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="alamat_bengkel">ALAMAT BENGKEL :</label>
+                    <input type="text" id="alamat_bengkel" name="alamat_bengkel" required placeholder="Alamat lengkap bengkel" value="{{ alamat_bengkel or '' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="status_pekerjaan">STATUS PEKERJAAN DI BENGKEL :</label>
+                    <select id="status_pekerjaan" name="status_pekerjaan" required>
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Pemilik" {% if status_pekerjaan == 'Pemilik' %}selected{% endif %}>Pemilik</option>
+                        <option value="Karyawan" {% if status_pekerjaan == 'Karyawan' %}selected{% endif %}>Karyawan</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="alasan">ALASAN MENGIKUTI DIKLAT :</label>
+                    <textarea id="alasan" name="alasan" required placeholder="Jelaskan alasan Anda mengikuti Diklat STN...">{{ alasan or '' }}</textarea>
+                </div>
+
+                <!-- Tambahkan Password -->
+                <div class="form-group">
+                    <label for="password">PASSWORD :</label>
+                    <input type="password" id="password" name="password" required minlength="6" placeholder="Minimal 6 karakter">
+                    <div class="password-info">Gunakan kombinasi huruf, angka, dan simbol untuk keamanan.</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password">KONFIRMASI PASSWORD :</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required minlength="6" placeholder="Ulangi password Anda">
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="setuju" name="setuju" required>
+                    <label for="setuju">Saya telah membaca dan menyetujui semua syarat di atas.</label>
+                </div>
+
+                <button type="submit" class="btn">✅ KIRIM PENDAFTARAN</button>
+            </form>
+
+            <a href="/" class="back-link">← Kembali ke Halaman Utama</a>
+        </div>
+    </div>
+</body>
+</html>

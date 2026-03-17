@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ folder_name }} - Dokumen Bengkel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-nav .logo img {
+            height: 36px;
+            width: auto;
+        }
+
+        .top-nav .logo h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .top-nav .nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .top-nav .nav a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .top-nav .nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .top-nav .nav a.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .top-nav .nav a.logout-btn {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+        }
+
+        .top-nav .nav a.logout-btn:hover {
+            background: rgba(255, 107, 107, 1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .breadcrumb a,
+        .breadcrumb span {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #999;
+        }
+
+        .file-list {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item:hover {
+            background: #f9f9f9;
+        }
+
+        .file-icon {
+            font-size: 2em;
+            margin-right: 20px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #999;
+        }
+
+        .file-action {
+            display: flex;
+            gap: 10px;
+            margin-left: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-download {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #5568d3;
+        }
+
+        .btn-folder {
+            background: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .btn-folder:hover {
+            background: #e0e0e0;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+            border: 2px solid #667eea;
+        }
+
+        .back-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 60px 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-box button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .file-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .file-action {
+                margin-left: 40px;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logobitmap.png') }}" alt="Logo Diklat">
+            <h1>Diklat Otomotif STN</h1>
+        </div>
+        <nav class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/documents" class="active">Dokumen</a>
+            <a href="/references">Kumpulan Referensi</a>
+            <a href="/api/chat/page">Tanya Jawab</a>
+            <a href="/dashboard/profile">Profil</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <a href="/documents" class="back-button">← Kembali ke Dokumen Bengkel</a>
+
+        <div class="header">
+            <h1>{{ folder_name }}</h1>
+            <div class="breadcrumb">
+                <a href="/documents">Dokumen Bengkel</a>
+                <span>/</span>
+                <span>{{ folder_name }}</span>
+            </div>
+        </div>
+
+        {% if items %}
+        <div class="search-box">
+            <form method="get" action="/documents/search" style="display: flex; width: 100%; gap: 10px;">
+                <input type="text" name="q" placeholder="Cari dalam semua dokumen..." required>
+                <button type="submit">🔍 Cari</button>
+            </form>
+        </div>
+
+        <div class="file-list">
+            {% for item in items %}
+            <div class="file-item">
+                <div class="file-icon">
+                    {% if item.is_directory %}
+                    📁
+                    {% else %}
+                    📄
+                    {% endif %}
+                </div>
+                <div class="file-info">
+                    <div class="file-name">{{ item.name }}</div>
+                    <div class="file-meta">
+                        {% if not item.is_directory %}
+                        {{ item.size }} • {{ item.mime_type }}
+                        {% else %}
+                        Folder
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="file-action">
+                    {% if item.is_directory %}
+                    <a href="/documents/folder/{{ item.id }}" class="btn btn-folder">Buka Folder →</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h2>Folder Kosong</h2>
+            <p>Tidak ada dokumen dalam folder ini.</p>
+            <a href="/documents"
+                style="margin-top: 20px; display: inline-block; color: #667eea; text-decoration: underline;">
+                Kembali ke daftar kategori
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

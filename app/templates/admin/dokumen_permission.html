@@ -1,0 +1,185 @@
+{%- extends "admin/base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin-top: 30px;">
+    <div class="card" style="border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px 15px 0 0;">
+            <h2 style="color: white; margin: 0; padding: 20px;">
+                <i class="fas fa-book"></i> Kelola Akses Dokumen Bengkel
+            </h2>
+        </div>
+
+        <div class="card-body" style="padding: 20px;">
+            <!-- Statistics -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 4px solid #2196f3;">
+                    <div style="font-size: 24px; font-weight: bold; color: #2196f3;">{{ total_peserta }}</div>
+                    <div style="color: #666; font-size: 14px;">Total Peserta</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; border-left: 4px solid #4caf50;">
+                    <div style="font-size: 24px; font-weight: bold; color: #4caf50;">{{ peserta_dengan_akses }}</div>
+                    <div style="color: #666; font-size: 14px;">Memiliki Akses</div>
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 10px; border-left: 4px solid #ff9800;">
+                    <div style="font-size: 24px; font-weight: bold; color: #ff9800;">{{ peserta_tanpa_akses }}</div>
+                    <div style="color: #666; font-size: 14px;">Tidak Memiliki Akses</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <form method="GET" class="form-inline" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="text" name="search" class="form-control" 
+                               placeholder="Cari nama, WhatsApp, atau email..." 
+                               value="{{ search }}" style="width: 100%;">
+                    </div>
+                    <div>
+                        <select name="filter" class="form-control">
+                            <option value="semua" {% if filter_akses == 'semua' %}selected{% endif %}>Semua Peserta</option>
+                            <option value="memiliki" {% if filter_akses == 'memiliki' %}selected{% endif %}>✅ Memiliki Akses</option>
+                            <option value="tidak" {% if filter_akses == 'tidak' %}selected{% endif %}>❌ Tidak Memiliki Akses</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Cari
+                    </button>
+                </form>
+            </div>
+
+            <!-- Table -->
+            {% if peserta_list.items %}
+            <div style="overflow-x: auto;">
+                <table class="table table-striped table-hover">
+                    <thead style="background: #f5f5f5;">
+                        <tr>
+                            <th style="width: 5%;">No</th>
+                            <th style="width: 20%;">Nama Peserta</th>
+                            <th style="width: 15%;">WhatsApp</th>
+                            <th style="width: 25%;">Email</th>
+                            <th style="width: 15%;">Status Akses</th>
+                            <th style="width: 15%;">Tanggal Diberikan</th>
+                            <th style="width: 10%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for idx, peserta in enumerate(peserta_list.items, start=1) %}
+                        <tr>
+                            <td><strong>{{ (peserta_list.page - 1) * 50 + idx }}</strong></td>
+                            <td>
+                                <a href="/admin/peserta/{{ peserta.id }}" style="text-decoration: none; color: #667eea; font-weight: 500;">
+                                    {{ peserta.nama }}
+                                </a>
+                            </td>
+                            <td>{{ peserta.whatsapp }}</td>
+                            <td>{{ peserta.email or '-' }}</td>
+                            <td>
+                                {% if peserta.akses_dokumen_bengkel %}
+                                    <span class="badge badge-success" style="background: #4caf50; color: white; padding: 6px 12px; border-radius: 20px;">
+                                        ✅ Aktif
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-secondary" style="background: #999; color: white; padding: 6px 12px; border-radius: 20px;">
+                                        ❌ Tidak Aktif
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if peserta.tanggal_izin_dokumen %}
+                                    <small style="color: #666;">{{ peserta.tanggal_izin_dokumen.strftime('%d %b %Y') }}</small>
+                                {% else %}
+                                    <small style="color: #999;">-</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="/admin/peserta/{{ peserta.id }}/toggle-dokumen" style="display: inline;">
+                                    {% if peserta.akses_dokumen_bengkel %}
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                onclick="return confirm('Cabut akses Dokumen Bengkel untuk {{ peserta.nama }}?')">
+                                            <i class="fas fa-lock"></i> Cabut
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-unlock"></i> Berikan
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if peserta_list.pages > 1 %}
+            <nav aria-label="Page navigation" style="margin-top: 20px; text-align: center;">
+                <ul class="pagination" style="justify-content: center;">
+                    {% if peserta_list.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ search }}&filter={{ filter_akses }}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta_list.prev_num }}&search={{ search }}&filter={{ filter_akses }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in peserta_list.iter_pages(left_edge=1, left_margin=1, right_margin=1, right_edge=1) %}
+                        {% if page_num %}
+                            {% if page_num == peserta_list.page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}&search={{ search }}&filter={{ filter_akses }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if peserta_list.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta_list.next_num }}&search={{ search }}&filter={{ filter_akses }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta_list.pages }}&search={{ search }}&filter={{ filter_akses }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div style="text-align: center; padding: 40px; color: #999;">
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px;"></i>
+                <p>Tidak ada peserta ditemukan</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table {
+        margin-bottom: 0;
+    }
+    .table td {
+        vertical-align: middle;
+        padding: 12px;
+    }
+    .table th {
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #ddd;
+    }
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}

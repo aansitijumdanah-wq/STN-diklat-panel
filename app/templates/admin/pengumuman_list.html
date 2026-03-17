@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Pengumuman - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #2a5298);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        header h1 {
+            font-size: 28px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 0 5px;
+            transition: opacity 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .filters {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filters select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+        }
+        .filters select option {
+            background: #1a2a6c;
+            color: #fff;
+        }
+        .announcement-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4facfe;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+        .announcement-content h3 {
+            color: #4facfe;
+            margin-bottom: 10px;
+        }
+        .announcement-meta {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+        .announcement-text {
+            line-height: 1.5;
+            margin-bottom: 10px;
+            max-width: 600px;
+        }
+        .announcement-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 0;
+        }
+        .btn-danger {
+            background: #f44336;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(79, 195, 247, 0.3);
+            color: #4fc3f7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        .status-aktif {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+        .status-nonaktif {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+        .empty {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📢 Kelola Pengumuman</h1>
+            <div>
+                <a href="/admin/announcements/create" class="btn">+ Buat Pengumuman</a>
+                <a href="/admin/dashboard" class="btn btn-secondary">← Kembali</a>
+            </div>
+        </header>
+
+        <div class="filters">
+            <form method="GET" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                <label for="batch" style="margin: 0;">Filter Batch:</label>
+                <select name="batch" id="batch" onchange="this.form.submit()">
+                    <option value="">Semua Batch</option>
+                    {% for batch in batches %}
+                        <option value="{{ batch.nama }}" {% if selected_batch == batch.nama %}selected{% endif %}>
+                            {{ batch.nama }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {% if announcements %}
+            {% for ann in announcements %}
+                <div class="announcement-card">
+                    <div class="announcement-content" style="flex: 1;">
+                        <h3>{{ ann.judul }}</h3>
+                        <div class="announcement-meta">
+                            Batch: 
+                            {% if ann.batch %}
+                                <strong>{{ ann.batch.nama }}</strong>
+                            {% else %}
+                                <strong style="color: #ffc107;">Semua Batch</strong>
+                            {% endif %}
+                            | Dibuat: {{ ann.tanggal_dibuat.strftime('%d-%m-%Y %H:%M') }}
+                            {% if ann.tanggal_dibuat != ann.tanggal_diubah %}
+                                | Diubah: {{ ann.tanggal_diubah.strftime('%d-%m-%Y %H:%M') }}
+                            {% endif %}
+                        </div>
+                        <div class="announcement-meta">Dibuat oleh: <strong>{{ ann.dibuat_oleh }}</strong></div>
+                        <div class="badge {% if ann.aktif %}status-aktif{% else %}status-nonaktif{% endif %}">
+                            {{ '✓ Aktif' if ann.aktif else '✗ Non-Aktif' }}
+                        </div>
+                        <div class="announcement-text">
+                            {{ ann.isi }}
+                        </div>
+                    </div>
+                    <div class="announcement-actions">
+                        <a href="/admin/announcements/{{ ann.id }}/edit" class="btn btn-small btn-secondary">Edit</a>
+                        <form method="POST" action="/admin/announcements/{{ ann.id }}/delete" style="display: inline; margin: 0;" onsubmit="return confirm('Yakin ingin menghapus pengumuman ini?');">
+                            <button type="submit" class="btn btn-small btn-danger">Hapus</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <p>Tidak ada pengumuman untuk batch yang dipilih</p>
+            </div>
+        {% endif %}
+
+        <footer style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); opacity: 0.7;">
+            <p>Total pengumuman: <strong>{{ announcements|length }}</strong></p>
+        </footer>
+    </div>
+</body>
+</html>

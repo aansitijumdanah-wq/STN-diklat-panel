@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Peserta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f5f7fa; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: #1a3a6c; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        header h1 { margin-bottom: 10px; }
+        .controls { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .filter-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .filter-group select, .filter-group input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .filter-group button { background: #2a5298; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        .filter-group button:hover { background: #1a3a6c; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th { background: #2a5298; color: white; padding: 12px; text-align: left; font-weight: bold; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f9f9f9; }
+        .status-belum { background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 3px; font-size: 12px; }
+        .status-menunggu { background: #fff3e0; color: #e65100; padding: 4px 8px; border-radius: 3px; font-size: 12px; }
+        .status-lunas { background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 3px; font-size: 12px; }
+        .status-ditolak { background: #ffebee; color: #c62828; padding: 4px 8px; border-radius: 3px; font-size: 12px; }
+        .akses-ya { color: #2e7d32; font-weight: bold; }
+        .akses-tidak { color: #c62828; font-weight: bold; }
+        .btn { display: inline-block; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; cursor: pointer; border: none; }
+        .btn-info { background: #2196F3; color: white; }
+        .btn-edit { background: #FF9800; color: white; }
+        .btn-danger { background: #f44336; color: white; }
+        .btn:hover { opacity: 0.9; }
+        a { color: #2a5298; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back { margin-top: 20px; }
+        .back a { background: #666; color: white; padding: 8px 15px; border-radius: 4px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👥 Kelola Peserta</h1>
+            <p>Kelola data peserta diklat</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="background: #c8e6c9; color: #2e7d32; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="controls">
+            <div class="filter-group">
+                <select onchange="window.location.href='/admin/peserta?status=' + this.value">
+                    <option value="semua" {% if status_filter == 'semua' %}selected{% endif %}>Semua Peserta ({{ total }})</option>
+                    <option value="belum" {% if status_filter == 'belum' %}selected{% endif %}>Status: Belum Bayar</option>
+                    <option value="menunggu" {% if status_filter == 'menunggu' %}selected{% endif %}>Status: Menunggu Verifikasi</option>
+                    <option value="lunas" {% if status_filter == 'lunas' %}selected{% endif %}>Status: Lunas</option>
+                    <option value="ditolak" {% if status_filter == 'ditolak' %}selected{% endif %}>Status: Ditolak</option>
+                </select>
+                <form style="display: flex; gap: 10px;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="text" name="search" placeholder="Cari nama atau WhatsApp..." value="{{ search }}">
+                    <button type="submit">🔍 Cari</button>
+                </form>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>WhatsApp</th>
+                    <th>Batch</th>
+                    <th>Status Pembayaran</th>
+                    <th>Akses Workshop</th>                    <th>Akses Dokumen</th>                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in peserta %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ p.nama }}</strong></td>
+                    <td>{{ p.whatsapp }}</td>
+                    <td>{{ p.batch }}</td>
+                    <td>
+                        {% if p.status_pembayaran == 'Belum' %}
+                            <span class="status-belum">Belum</span>
+                        {% elif p.status_pembayaran == 'Menunggu' %}
+                            <span class="status-menunggu">Menunggu</span>
+                        {% elif p.status_pembayaran == 'Lunas' %}
+                            <span class="status-lunas">Lunas</span>
+                        {% else %}
+                            <span class="status-ditolak">Ditolak</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.akses_workshop %}
+                            <span class="akses-ya">✓ Ya</span>
+                        {% else %}
+                            <span class="akses-tidak">✗ Tidak</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.akses_dokumen_bengkel %}
+                            <span class="akses-ya">✓ Ya</span>
+                        {% else %}
+                            <span class="akses-tidak">✗ Tidak</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/admin/peserta/{{ p.id }}" class="btn btn-info">Lihat</a>
+                        <a href="/admin/peserta/{{ p.id }}/edit" class="btn btn-edit">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if peserta|length == 0 %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p>📭 Tidak ada peserta ditemukan</p>
+        </div>
+        {% endif %}
+
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Page navigation" style="text-align: center; margin: 20px 0;">
+            {% if pagination.has_prev %}
+                <a href="?page={{ pagination.prev_num }}{% if status_filter != 'semua' %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" style="margin: 0 5px; padding: 5px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 3px;">Previous</a>
+            {% endif %}
+            
+            Page {{ current_page }} of {{ pagination.pages }}
+            
+            {% if pagination.has_next %}
+                <a href="?page={{ pagination.next_num }}{% if status_filter != 'semua' %}&status={{ status_filter }}{% endif %}{% if search %}&search={{ search }}{% endif %}" style="margin: 0 5px; padding: 5px 10px; background: #007bff; color: white; text-decoration: none; border-radius: 3px;">Next</a>
+            {% endif %}
+        </nav>
+        {% endif %}
+
+        <div class="back">
+            <a href="/admin/dashboard">← Kembali ke Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Peserta</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f5f7fa; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        header { background: #1a3a6c; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .form-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .form-box h2 { color: #1a3a6c; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2a5298; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-group textarea { height: 80px; resize: vertical; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input { width: auto; }
+        .btn { display: inline-block; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-primary { background: #2a5298; color: white; }
+        .btn-secondary { background: #666; color: white; }
+        .btn:hover { opacity: 0.9; }
+        .back { margin-top: 20px; }
+        .back a { background: #666; color: white; padding: 8px 15px; border-radius: 4px; display: inline-block; text-decoration: none; }
+        .alert { background: #c8e6c9; color: #2e7d32; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✏️ Edit Data Peserta</h1>
+            <p>{{ peserta.nama }}</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-box">
+                <h2>👤 Informasi Pribadi</h2>
+                <div class="form-group">
+                    <label>Nama *</label>
+                    <input type="text" name="nama" value="{{ peserta.nama }}" required>
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp *</label>
+                    <input type="text" name="whatsapp" value="{{ peserta.whatsapp }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ peserta.email or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Alamat</label>
+                    <textarea name="alamat">{{ peserta.alamat or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h2>🏢 Informasi Bengkel</h2>
+                <div class="form-group">
+                    <label>Nama Bengkel</label>
+                    <input type="text" name="nama_bengkel" value="{{ peserta.nama_bengkel or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Alamat Bengkel</label>
+                    <textarea name="alamat_bengkel">{{ peserta.alamat_bengkel or '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status Pekerjaan</label>
+                    <select name="status_pekerjaan">
+                        <option value="">-- Pilih Status --</option>
+                        <option value="Pemilik" {% if peserta.status_pekerjaan == 'Pemilik' %}selected{% endif %}>Pemilik</option>
+                        <option value="Karyawan" {% if peserta.status_pekerjaan == 'Karyawan' %}selected{% endif %}>Karyawan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Alasan Mengikuti Diklat</label>
+                    <textarea name="alasan">{{ peserta.alasan or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-box">
+                <h2>📚 Informasi Diklat</h2>
+                <div class="form-group">
+                    <label>Batch *</label>
+                    <select name="batch" required>
+                        <option value="">-- Pilih Batch --</option>
+                        {% for batch in batches %}
+                            <option value="{{ batch.nama }}" {% if peserta.batch == batch.nama %}selected{% endif %}>{{ batch.nama }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status Pembayaran *</label>
+                    <select name="status_pembayaran" required>
+                        <option value="Belum" {% if peserta.status_pembayaran == 'Belum' %}selected{% endif %}>Belum</option>
+                        <option value="Menunggu" {% if peserta.status_pembayaran == 'Menunggu' %}selected{% endif %}>Menunggu Verifikasi</option>
+                        <option value="Lunas" {% if peserta.status_pembayaran == 'Lunas' %}selected{% endif %}>Lunas</option>
+                        <option value="Ditolak" {% if peserta.status_pembayaran == 'Ditolak' %}selected{% endif %}>Ditolak</option>
+                    </select>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="akses" name="akses_workshop" {% if peserta.akses_workshop %}checked{% endif %}>
+                    <label for="akses">Aktifkan Akses Workshop</label>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+                <a href="/admin/peserta/{{ peserta.id }}" class="btn btn-secondary">Batal</a>
+            </div>
+        </form>
+
+        <div class="back">
+            <a href="/admin/peserta">← Kembali ke Daftar Peserta</a>
+        </div>
+    </div>
+</body>
+</html>

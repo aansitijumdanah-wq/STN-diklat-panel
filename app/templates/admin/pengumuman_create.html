@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Pengumuman - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #2a5298);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        header h1 {
+            font-size: 28px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .form-card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4facfe;
+        }
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: rgba(79, 195, 247, 0.1);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+        }
+        select option {
+            background: #1a2a6c;
+            color: #fff;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .char-count {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 20px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .alert-info {
+            background: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196f3;
+            color: #90caf9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📢 Buat Pengumuman Baru</h1>
+            <p>Buat pengumuman untuk peserta dalam batch tertentu atau untuk semua batch</p>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-card">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="batch_id">Target Batch</label>
+                    <select name="batch_id" id="batch_id">
+                        <option value="">-- Semua Batch --</option>
+                        {% for batch in batches %}
+                            <option value="{{ batch.id }}">{{ batch.nama }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="help-text">Biarkan kosong untuk mengirim ke semua batch peserta</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="judul">Judul Pengumuman <span style="color: #f44336;">*</span></label>
+                    <input 
+                        type="text" 
+                        name="judul" 
+                        id="judul" 
+                        placeholder="Contoh: Jadwal Workshop Minggu Depan" 
+                        required
+                        maxlength="255"
+                        onkeyup="updateCharCount('judul', 255)"
+                    >
+                    <span class="char-count">
+                        <span id="judul-count">0</span>/255 karakter
+                    </span>
+                </div>
+
+                <div class="form-group">
+                    <label for="isi">Isi Pengumuman <span style="color: #f44336;">*</span></label>
+                    <textarea 
+                        name="isi" 
+                        id="isi" 
+                        placeholder="Tulis isi pengumuman di sini..." 
+                        required
+                        maxlength="5000"
+                        onkeyup="updateCharCount('isi', 5000)"
+                    ></textarea>
+                    <span class="char-count">
+                        <span id="isi-count">0</span>/5000 karakter
+                    </span>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary">✓ Buat Pengumuman</button>
+                    <a href="/admin/announcements" class="btn btn-secondary">← Batal</a>
+                </div>
+            </form>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 10px;">
+            <h3 style="color: #4facfe; margin-bottom: 10px;">💡 Tips</h3>
+            <ul style="padding-left: 20px; line-height: 1.8;">
+                <li>Gunakan judul yang singkat dan jelas</li>
+                <li>Jelaskan pengumuman secara detail di bagian isi</li>
+                <li>Jika ingin mengirim ke batch spesifik, pilih batch di atas</li>
+                <li>Pengumuman akan langsung aktif dan terlihat oleh peserta</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function updateCharCount(fieldId, maxLength) {
+            const field = document.getElementById(fieldId);
+            const countSpan = document.getElementById(fieldId + '-count');
+            countSpan.textContent = field.value.length;
+            
+            if (field.value.length > maxLength) {
+                field.value = field.value.substring(0, maxLength);
+                countSpan.textContent = maxLength;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Diklat Otomotif STN</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: linear-gradient(135deg, #1a2a6c, #2a5298); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
+        .login-box h1 { color: #1a3a6c; text-align: center; margin-bottom: 10px; }
+        .login-box p { color: #666; text-align: center; margin-bottom: 30px; font-size: 12px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2a5298; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        .form-group input:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 5px rgba(42, 82, 152, 0.3); }
+        .btn { width: 100%; padding: 12px; background: #2a5298; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #1a3a6c; }
+        .alert { padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        .alert-error { background: #ffebee; color: #c62828; border-left: 4px solid #c62828; }
+        .alert-warning { background: #fff3e0; color: #e65100; border-left: 4px solid #e65100; }
+        .footer { text-align: center; color: #999; margin-top: 20px; font-size: 12px; }
+        .footer-link { text-align: center; margin-top: 20px; }
+        .footer-link a { color: #2a5298; text-decoration: none; font-weight: bold; }
+        .footer-link a:hover { text-decoration: underline; }
+        .help-text { font-size: 11px; color: #666; margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+        .help-text strong { color: #333; }
+    </style>
+    <script>
+        function checkCookies() {
+            if (!navigator.cookieEnabled) {
+                document.getElementById('cookieWarning').style.display = 'block';
+            }
+        }
+        window.addEventListener('load', checkCookies);
+    </script>
+</head>
+<body>
+    <div class="login-box">
+        <h1>👤 Login Peserta</h1>
+        <p>Diklat Otomotif STN</p>
+
+        <div id="cookieWarning" style="display: none;" class="alert alert-warning">
+            ⚠️ Cookies tidak aktif! Aktifkan cookies di browser untuk login.
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert alert-error">
+                    ❌ {{ messages[0] }}
+                </div>
+                <div class="help-text">
+                    <strong>Jika dapat error "CSRF token missing":</strong><br>
+                    • Pastikan cookies aktif di browser<br>
+                    • Coba reload halaman (F5)<br>
+                    • Buka di incognito window<br>
+                    • Tunggu 1 menit kemudian coba lagi
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="form-group">
+                <label for="whatsapp">Nomor WhatsApp</label>
+                <input type="text" id="whatsapp" name="whatsapp" placeholder="Contoh: 081234567890" required autofocus>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Masukkan password" required>
+            </div>
+            <button type="submit" class="btn">🔓 Login</button>
+        </form>
+
+        <div class="footer-link">
+            <p>Belum punya akun? <a href="/register">Daftar di sini</a></p>
+        </div>
+
+        <div class="footer">
+            <p>Hanya untuk peserta yang sudah terdaftar</p>
+        </div>
+    </div>
+</body>
+</html>

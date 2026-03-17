@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #1a3a6c;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box h3 {
+            color: #1a3a6c;
+            margin-bottom: 10px;
+        }
+
+        .stat-box .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2a5298;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .menu-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            text-decoration: none;
+            color: #1a3a6c;
+            transition: transform 0.3s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-5px);
+            background: #f0f4f8;
+        }
+
+        .menu-item h2 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .batches {
+            margin-top: 30px;
+        }
+
+        .batches h2 {
+            margin-bottom: 15px;
+            color: #1a3a6c;
+        }
+
+        .batch-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .batch-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .batch-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #2a5298;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background: #1a3a6c;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-logo">
+                <img src="{{ url_for('static', filename='images/logobitmap.png') }}" alt="Logo Admin">
+            </div>
+            <div class="header-content">
+                <h1>👨‍💼 Admin Dashboard</h1>
+                <p>Kelola peserta, pembayaran, batch, dan akses workshop</p>
+            </div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>📊 Total Peserta</h3>
+                <div class="number">{{ total_peserta }}</div>
+            </div>
+            <div class="stat-box">
+                <h3>⏳ Menunggu Verifikasi</h3>
+                <div class="number">{{ belum_bayar }}</div>
+            </div>
+            <div class="stat-box">
+                <h3>📚 Total Grup Diklat</h3>
+                <div class="number">{{ batches|length }}</div>
+            </div>
+        </div>
+
+        <div class="menu">
+            <a href="/admin/peserta" class="menu-item">
+                <h2>👥 Kelola Peserta</h2>
+                <p>Lihat, edit, hapus peserta</p>
+            </a>
+            <a href="/admin/pembayaran" class="menu-item">
+                <h2>💳 Verifikasi Pembayaran</h2>
+                <p>Periksa dan verifikasi bukti transfer</p>
+            </a>
+            <a href="/admin/grup" class="menu-item">
+                <h2>📖 Kelola Grup Diklat</h2>
+                <p>Lihat dan atur grup diklat</p>
+            </a>
+            <a href="/admin/announcements" class="menu-item">
+                <h2>📢 Pengumuman</h2>
+                <p>Buat dan kelola pengumuman batch</p>
+            </a>
+            <a href="/admin/logout" class="menu-item" style="background: #ffe0e0;">
+                <h2>🚪 Logout</h2>
+                <p>Keluar dari admin panel</p>
+            </a>
+        </div>
+
+        {% if batches %}
+        <div class="batches">
+            <h2>📚 Daftar Grup Diklat Aktif</h2>
+            <div class="batch-list">
+                {% for batch in batches %}
+                <div class="batch-item">
+                    <div style="text-align: left;">
+                        <strong>{{ batch.nama }}</strong><br>
+                        <small style="color: #666;">Dibuat: {{ batch.tanggal_dibuat.strftime('%d-%m-%Y') if
+                            batch.tanggal_dibuat else 'N/A' }}</small>
+                    </div>
+                    <div>
+                        {% if batch.akses_workshop_default %}
+                        <span style="background: #e8f5e9; padding: 5px 10px; border-radius: 3px; font-size: 12px;">✓
+                            Workshop Aktif</span>
+                        {% else %}
+                        <span style="background: #fff3e0; padding: 5px 10px; border-radius: 3px; font-size: 12px;">⊘
+                            Workshop Non-Aktif</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <form method="POST" action="/admin/grup/{{ batch.id }}/toggle-akses" style="display:inline;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button class="btn" type="submit">Toggle Akses Grup</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <footer>
+            <p>Diklat Otomotif STN Admin Panel | Hanya untuk administrator</p>
+        </footer>
+    </div>
+</body>
+
+</html>

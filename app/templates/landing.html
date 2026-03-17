@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diklat Otomotif STN - Master Diagnosa & Perbaikan Modern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f8f9fa;
+            color: #212529;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a2a6c, #2a5298);
+            color: white;
+            padding: 40px 0;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        header .container {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .header-content {
+            flex: 1;
+        }
+
+        .hero-image {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s;
+            border-top: 4px solid #2a5298;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .feature-card ul {
+            padding-left: 20px;
+        }
+
+        .feature-card li {
+            margin-bottom: 10px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            padding: 50px 20px;
+            text-align: center;
+            border-radius: 15px;
+            margin: 50px 0;
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: #1a2a6c;
+            padding: 14px 36px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .pricing {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .pricing h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff7e5f;
+            margin: 10px 0;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            margin-top: 0;
+        }
+
+        header p {
+            font-size: 1.4rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #6c757d;
+            margin-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .logo {
+            flex-shrink: 0;
+        }
+
+        .logo img {
+            height: 130px;
+            width: auto;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-content {
+                width: 100%;
+            }
+
+            header h1 {
+                font-size: 2.2rem;
+            }
+
+            header p {
+                font-size: 1.1rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/logobitmap.png') }}" alt="Logo Diklat Otomotif STN">
+            </div>
+            <div class="header-content">
+                <h1>Diklat Otomotif</h1>
+                <p>Master Diagnosa & Perbaikan Kendaraan Modern</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero-image">
+            <img src="{{ url_for('static', filename='images/web.png') }}"
+                alt="Diagnosa ECU, Mobil Hybrid, Teknisi Profesional">
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>📡 Datastream ECU</h3>
+                <ul>
+                    <li>Pahami data real-time dari ECU</li>
+                    <li>Analisis parameter sensor & aktuator</li>
+                    <li>Deteksi kesalahan sistem injection</li>
+                    <li>Studi kasus: Mesin Mati Saat Panas</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ Teknologi Kendaraan Modern</h3>
+                <ul>
+                    <li>Honda I-DSI, VTEC, dan VCM</li>
+                    <li>Toyota Dual VVT-i & Hybrid</li>
+                    <li>Mitsubishi MIVEC & Super Select</li>
+                    <li>Sistem CAN bus & network komunikasi</li>
+                </ul>
+            </div>
+            <div class="feature-card">
+                <h3>🛠️ Strategi Perbaikan Profesional</h3>
+                <ul>
+                    <li>Diagnosa sistem bahan bakar elektronik</li>
+                    <li>Perbaikan immobilizer & smart key</li>
+                    <li>Troubleshooting kelistrikan kompleks</li>
+                    <li>Reset ECU & adaptasi throttle body</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="pricing">
+            <h3>Investasi untuk Masa Depan Bengkel Anda</h3>
+            <div class="price">Rp 350.000/bulan</div>
+            <p>Akses materi seumur hidup + grup WhatsApp eksklusif</p>
+            <p><strong>Peserta yang mengikuti KOPDAR</strong> dapat akses GRATIS perpustakaan workshop manual lengkap
+                (1.000+ PDF)</p>
+        </div>
+
+        <div class="cta-section">
+            <h2>Siap Kuasai Teknologi Otomotif Masa Depan?</h2>
+            <div class="cta-buttons">
+                <a href="/daftar" class="btn">✅ Daftar Sekarang</a>
+                <a href="/login" class="btn">🔑 Sudah Punya Akun? Login</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Diklat Otomotif STN. by data by fakta by rasa.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

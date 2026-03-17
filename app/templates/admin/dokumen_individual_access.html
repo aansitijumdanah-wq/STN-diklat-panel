@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Akses Individual - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{{ url_for('main.admin_dokumen') }}" class="btn btn-secondary mb-3">
+                ← Kembali ke Dashboard Dokumen
+            </a>
+            <h1>👤 Kelola Akses Dokumen Per Peserta</h1>
+            <p class="text-muted">Berikan atau cabut akses Dokumen Bengkel untuk peserta individual</p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="form-inline">
+                        <input type="text" name="search" class="form-control mr-2" 
+                               placeholder="Cari nama atau nomor WhatsApp..." 
+                               value="{{ search }}" style="flex: 1;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Cari
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Peserta List -->
+    <div class="row">
+        <div class="col-md-12">
+            {% if peserta.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nama</th>
+                            <th>WhatsApp</th>
+                            <th>Batch</th>
+                            <th>Status Akses</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in peserta.items %}
+                        <tr id="peserta-row-{{ p.id }}">
+                            <td><strong>{{ p.nama }}</strong></td>
+                            <td>
+                                <a href="https://wa.me/{{ p.whatsapp }}" target="_blank" class="text-success">
+                                    {{ p.whatsapp }}
+                                </a>
+                            </td>
+                            <td>{{ p.batch }}</td>
+                            <td>
+                                {% if access_dict.get(p.id) %}
+                                    {% if access_dict[p.id].is_aktif() %}
+                                        <span class="badge badge-success">✅ Aktif</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">❌ Tidak Aktif</span>
+                                    {% endif %}
+                                {% elif p.akses_dokumen_bengkel %}
+                                    <span class="badge badge-info">📋 Legacy</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">⭕ Belum</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary open-access-btn" 
+                                        data-peserta-id="{{ p.id }}"
+                                        data-peserta-nama="{{ p.nama }}">
+                                    <i class="fas fa-edit"></i> Kelola
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if peserta.pages > 1 %}
+            <nav>
+                <ul class="pagination justify-content-center">
+                    {% if peserta.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1&search={{ search }}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta.prev_num }}&search={{ search }}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for page_num in peserta.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == peserta.page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}&search={{ search }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if peserta.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta.next_num }}&search={{ search }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ peserta.pages }}&search={{ search }}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="alert alert-info">
+                <strong>ℹ️ Tidak ada peserta yang ditemukan</strong><br>
+                Coba cari dengan kata kunci yang berbeda.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Access Management Modal -->
+<div class="modal fade" id="accessModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kelola Akses Dokumen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Peserta:</strong> <span id="modalPesertaNama"></span></p>
+                
+                <div class="form-group">
+                    <label><strong>Status Akses</strong></label>
+                    <select class="form-control" id="modalGrant">
+                        <option value="true">✅ Berikan Akses</option>
+                        <option value="false">❌ Cabut Akses</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><strong>Tanggal Kadaluarsa (Opsional)</strong></label>
+                    <input type="date" class="form-control" id="modalExpiry">
+                    <small class="text-muted">Kosongkan jika akses selamanya</small>
+                </div>
+
+                <div class="form-group">
+                    <label><strong>Catatan/Alasan</strong></label>
+                    <textarea class="form-control" id="modalCatatan" 
+                              rows="2" placeholder="Masukkan catatan (opsional)"></textarea>
+                </div>
+
+                <div id="modalResult"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" id="modalSubmitBtn" onclick="submitAccessChange()">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table {
+    font-size: 0.95rem;
+}
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.85rem;
+}
+</style>
+
+<script>
+let currentPesertaId = null;
+
+function openAccessModal(pesertaId, pesertaNama) {
+    currentPesertaId = pesertaId;
+    document.getElementById('modalPesertaNama').textContent = pesertaNama;
+    document.getElementById('modalResult').innerHTML = '';
+    $('#accessModal').modal('show');
+}
+
+// Handle click on Kelola buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.open-access-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const pesertaId = this.getAttribute('data-peserta-id');
+            const pesertaNama = this.getAttribute('data-peserta-nama');
+            openAccessModal(pesertaId, pesertaNama);
+        });
+    });
+});
+
+function submitAccessChange() {
+    if (!currentPesertaId) {
+        alert('❌ Peserta ID tidak ditemukan');
+        return;
+    }
+
+    const grant = document.getElementById('modalGrant').value === 'true';
+    const tanggalKadaluarsa = document.getElementById('modalExpiry').value;
+    const catatan = document.getElementById('modalCatatan').value;
+
+    const submitBtn = document.getElementById('modalSubmitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+    fetch('{{ url_for("main.admin_grant_individual_access") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            peserta_id: currentPesertaId,
+            grant: grant,
+            tanggal_kadaluarsa: tanggalKadaluarsa,
+            catatan: catatan
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const resultDiv = document.getElementById('modalResult');
+            resultDiv.innerHTML = '<div class="alert alert-success">✅ ' + data.message + '</div>';
+            // Reload page after 2 seconds
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            const resultDiv = document.getElementById('modalResult');
+            resultDiv.innerHTML = '<div class="alert alert-danger">❌ Error: ' + data.error + '</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        const resultDiv = document.getElementById('modalResult');
+        resultDiv.innerHTML = '<div class="alert alert-danger">❌ Terjadi kesalahan: ' + error + '</div>';
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan';
+    });
+}
+</script>
+
+<!-- Include jQuery and Bootstrap -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+{% endblock %}

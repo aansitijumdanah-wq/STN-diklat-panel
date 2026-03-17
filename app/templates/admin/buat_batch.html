@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Grup Diklat Baru</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f5f7fa; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        header { background: #1a3a6c; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #2a5298; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 5px rgba(42, 82, 152, 0.3); }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; }
+        .checkbox-group input { width: auto; }
+        .btn { display: inline-block; padding: 12px 30px; background: #2a5298; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn:hover { background: #1a3a6c; }
+        .btn-secondary { background: #666; margin-left: 10px; }
+        .alert { background: #c8e6c9; color: #2e7d32; padding: 12px; border-radius: 4px; margin-bottom: 20px; }
+        .back { margin-top: 20px; }
+        .back a { background: #666; color: white; padding: 8px 15px; border-radius: 4px; display: inline-block; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Buat Grup Diklat Baru</h1>
+            <p>Kelola grup peserta diklat</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="alert">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-box">
+            <form method="POST" action="/admin/grup/buat">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <div class="form-group">
+                    <label for="nama">Nama Grup Diklat *</label>
+                    <input type="text" id="nama" name="nama" placeholder="Contoh: Diklat STN 2025 - Grup 3" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="whatsapp_link">Link Grup WhatsApp *</label>
+                    <input type="url" id="whatsapp_link" name="whatsapp_link" placeholder="https://chat.whatsapp.com/..." required>
+                </div>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="akses_workshop" name="akses_workshop">
+                    <label for="akses_workshop">Beri akses workshop otomatis ke peserta baru grup ini</label>
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" class="btn">✅ Buat Grup Diklat</button>
+                    <a href="/admin/dashboard" class="btn btn-secondary">Batal</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="back">
+            <a href="/admin/dashboard">← Kembali ke Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

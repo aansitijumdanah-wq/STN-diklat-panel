@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Tanya Jawab Teknis - STN DIKLAT</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c 0%, #2a5298 50%, #1e3a8a 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .container-fluid {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 40px);
+        }
+
+        .row {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+
+        /* Chat Column - Flex grow to fill space */
+        .col-lg-8 {
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+        }
+
+        /* Sidebar Column - Flexible */
+        .col-lg-4 {
+            flex: 0 1 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            border-bottom: none;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .card-header>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .bg-info {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%) !important;
+            color: white !important;
+        }
+
+        #chatMessages {
+            background: linear-gradient(180deg, rgba(248, 249, 250, 0.95) 0%, rgba(233, 236, 239, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+            padding: 12px 0;
+        }
+
+        .chat-message {
+            margin-bottom: 1.6rem;
+            margin-left: 0;
+            margin-right: 0;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .chat-message:last-child {
+            margin-bottom: 0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .chat-message:hover .message-content {
+            transform: translateY(-2px);
+        }
+
+        .user-message {
+            text-align: right;
+            margin-left: 20%;
+            justify-content: flex-end;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+            padding: 14px 20px;
+            display: inline-block;
+            max-width: 85%;
+            word-wrap: break-word;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.35);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+            min-height: auto;
+            word-break: break-word;
+        }
+
+        .user-message .message-content a {
+            color: rgba(255, 255, 255, 0.95);
+            text-decoration: underline;
+        }
+
+        .assistant-message {
+            margin-right: 20%;
+            justify-content: flex-start;
+        }
+
+        .assistant-message .message-content {
+            background: linear-gradient(to bottom right, #ffffff, #f8f9fa);
+            color: #2c3e50;
+            border-radius: 18px 18px 18px 4px;
+            padding: 18px 22px;
+            max-width: 85%;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(102, 126, 234, 0.12);
+            line-height: 1.7;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .assistant-message .message-content a {
+            color: #667eea;
+            text-decoration: none;
+            border-bottom: 1px dotted #667eea;
+            transition: all 0.2s ease;
+        }
+
+        .assistant-message .message-content a:hover {
+            color: #764ba2;
+            border-bottom-color: #764ba2;
+        }
+
+        /* Better typography for AI responses */
+        .assistant-message .message-content h1,
+        .assistant-message .message-content h2,
+        .assistant-message .message-content h3,
+        .assistant-message .message-content h4,
+        .assistant-message .message-content h5,
+        .assistant-message .message-content h6 {
+            margin-top: 12px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #1a3a52;
+            letter-spacing: 0.3px;
+        }
+
+        /* Numbered sections styling */
+        .assistant-message .message-content>*:first-child {
+            margin-top: 0;
+        }
+
+        .assistant-message .message-content strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Better paragraph spacing */
+        .assistant-message .message-content p {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .assistant-message .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Lists styling */
+        .assistant-message .message-content ul,
+        .assistant-message .message-content ol {
+            margin: 12px 0;
+            padding-left: 24px;
+        }
+
+        .assistant-message .message-content li {
+            margin: 8px 0;
+            line-height: 1.7;
+        }
+
+        /* Code and special text */
+        .assistant-message .message-content code {
+            background: rgba(102, 126, 234, 0.12);
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            font-weight: 500;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        /* Pre/Code block styling */
+        .assistant-message .message-content pre {
+            background: #f5f7fa;
+            border-left: 4px solid #667eea;
+            padding: 14px 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
+        .assistant-message .message-content pre code {
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: #333;
+            font-size: 0.85em;
+        }
+
+        /* Blockquote styling */
+        .assistant-message .message-content blockquote,
+        .assistant-message .message-content .quote {
+            border-left: 4px solid #667eea;
+            padding-left: 16px;
+            margin: 12px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Table styling */
+        .assistant-message .message-content table {
+            width: 100%;
+            margin: 16px 0;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        }
+
+        .assistant-message .message-content table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 14px;
+            font-weight: 600;
+            text-align: left;
+            letter-spacing: 0.3px;
+        }
+
+        .assistant-message .message-content table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            color: #555;
+        }
+
+        .assistant-message .message-content table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .assistant-message .message-content table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        /* Section break styling */
+        .assistant-message .message-content hr {
+            border: none;
+            border-top: 1px dashed rgba(102, 126, 234, 0.3);
+            margin: 12px 0;
+        }
+
+        .source-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            border: 1.5px solid rgba(102, 126, 234, 0.25);
+            border-radius: 8px;
+            padding: 8px 16px;
+            margin-top: 12px;
+            margin-right: 10px;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-decoration: none;
+            color: #667eea;
+            letter-spacing: 0.3px;
+        }
+
+        .source-badge:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.25);
+            color: #764ba2;
+        }
+
+        .source-badge i {
+            margin-right: 6px;
+            color: #667eea;
+        }
+
+        .source-badge:hover i {
+            color: #764ba2;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #9a9a9a;
+            margin-top: 8px;
+            letter-spacing: 0.2px;
+        }
+
+        .input-group {
+            border-radius: 28px;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:focus-within {
+            box-shadow: 0 8px 28px rgba(102, 126, 234, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .input-group input {
+            border: none;
+            font-size: 0.95rem;
+            padding: 14px 20px;
+            background: transparent;
+            color: #333;
+            letter-spacing: 0.3px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .input-group input::placeholder {
+            color: #a8a8a8;
+            font-style: italic;
+            opacity: 0.75;
+        }
+
+        .input-group button {
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 0 28px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .input-group button:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-group button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline-primary {
+            border: 1.5px solid #667eea;
+            color: #667eea;
+            background: transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: transparent;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #f5576c, #f093fb);
+            box-shadow: 0 6px 16px rgba(245, 87, 108, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .card-body {
+            padding: 1.8rem;
+            border-radius: 0 0 15px 15px;
+            background: rgba(248, 249, 250, 0.6);
+            line-height: 1.7;
+        }
+
+        .card-body p {
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .card-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-body small {
+            line-height: 1.7;
+            color: #7a8ba0;
+        }
+
+
+
+        .border-bottom {
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+        }
+
+        .spinner-border-sm {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        /* Enhanced Styling */
+        .card-body {
+            padding: 1.5rem;
+            border-radius: 0 0 15px 15px;
+            background: rgba(248, 249, 250, 0.6);
+        }
+
+
+
+        .border-bottom {
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a, #fee140) !important;
+            border: none;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(250, 112, 154, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 6px 16px rgba(250, 112, 154, 0.35);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border: 1.5px solid #e0e0e0;
+            color: #2c3e50;
+            background: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            border-color: transparent;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 87, 108, 0.2);
+        }
+
+        .card-header h5,
+        .card-header h6 {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+
+        .card-header small {
+            opacity: 0.9;
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+        }
+
+        .spinner-border-sm {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .list-unstyled li strong {
+            color: #667eea;
+        }
+
+        .list-unstyled li strong:first-letter {
+            font-size: 1.2em;
+        }
+
+        /* Smooth text color transition */
+        .text-muted {
+            color: #7a8ba0;
+            transition: color 0.3s ease;
+        }
+
+        /* Icon size for cards */
+        .card-header i {
+            font-size: 1.2em;
+        }
+
+        /* Message content improvements */
+        .message-content {
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Tips section styling */
+        .list-unstyled {
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .list-unstyled li {
+            padding: 12px 0 12px 12px;
+            transition: all 0.2s ease;
+            margin-left: 0;
+            border-left: 3px solid transparent;
+        }
+
+        .list-unstyled li:hover {
+            padding-left: 14px;
+            color: #667eea;
+            border-left-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 4px;
+        }
+
+        .list-unstyled li strong {
+            color: #667eea;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .list-unstyled li small {
+            color: #7a8ba0;
+            line-height: 1.6;
+            display: block;
+        }
+
+        .btn-outline-secondary i {
+            margin-right: 8px;
+            font-size: 0.9rem;
+        }
+
+        .btn.text-start {
+            text-align: left;
+            padding-left: 16px;
+        }
+
+        .card-body small {
+            line-height: 1.6;
+        }
+
+        /* Initial message styling */
+        #chatMessages .text-center {
+            color: #7a8ba0;
+        }
+
+        #chatMessages .text-center p {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 1024px) {
+            .col-lg-8 {
+                width: 100%;
+                flex: 1;
+            }
+
+            .col-lg-4 {
+                width: 100%;
+                flex: 0 0 auto;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .user-message {
+                margin-left: 5%;
+            }
+
+            .assistant-message {
+                margin-right: 5%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 10px;
+                min-height: calc(100vh - 20px);
+            }
+
+            .row {
+                gap: 10px;
+            }
+
+            .col-lg-8,
+            .col-lg-4 {
+                width: 100% !important;
+            }
+
+            .user-message {
+                margin-left: 0;
+            }
+
+            .assistant-message {
+                margin-right: 0;
+            }
+
+            .card {
+                border-radius: 12px;
+            }
+
+            .card-header {
+                padding: 1rem;
+                border-radius: 12px 12px 0 0 !important;
+            }
+
+            .card-body {
+                padding: 1rem;
+            }
+
+            .user-message .message-content,
+            .assistant-message .message-content {
+                max-width: 95%;
+            }
+
+            .input-group {
+                border-radius: 20px;
+            }
+
+            .input-group input {
+                padding: 12px 15px;
+            }
+
+            .input-group button {
+                padding: 0 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding: 5px;
+                min-height: calc(100vh - 10px);
+            }
+
+            .card-header h5 {
+                font-size: 1rem;
+            }
+
+            .card-header small {
+                font-size: 0.7rem;
+            }
+
+            .badge {
+                font-size: 0.7rem;
+            }
+
+            .chat-message {
+                margin-bottom: 1rem;
+            }
+
+            #chatMessages {
+                padding: 8px 0;
+            }
+        }
+
+        /* Smooth transitions for buttons */
+        .btn {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Loading state styling */
+        #loadingIndicator {
+            border-radius: 0 0 15px 15px;
+            padding: 24px !important;
+            animation: fadeInPulse 0.4s ease-in-out;
+        }
+
+        @keyframes fadeInPulse {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Message padding */
+        .chat-message.user-message {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .chat-message.assistant-message {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        /* Ensure cards are flex containers */
+        .col-lg-8>.card,
+        .col-lg-4>.card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-lg-8>.card {
+            flex: 1;
+        }
+
+        .card-footer {
+            flex-shrink: 0;
+        }
+
+        .card-body {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Sidebar cards sizing */
+        .col-lg-4 .card {
+            flex-shrink: 0;
+        }
+
+
+
+        .alert-info {
+            border-left: 3px solid #0c5460;
+            background-color: rgba(204, 229, 255, 0.15);
+        }
+
+        /* Better spacing for wide screens */
+        @media (min-width: 1441px) {
+            .col-lg-4 {
+                width: 400px;
+            }
+
+            .col-lg-8 {
+                flex: 1 1 auto;
+            }
+        }
+
+        /* Tablet landscape optimization */
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            .col-lg-4 {
+                width: 320px;
+            }
+
+            .col-lg-8 {
+                flex: 1 1 auto;
+            }
+        }
+
+        /* NAVIGATION BAR */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-nav .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-nav .logo img {
+            height: 36px;
+            width: auto;
+        }
+
+        .top-nav .logo h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .top-nav .nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .top-nav .nav a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .top-nav .nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .top-nav .nav a.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: #fff;
+        }
+
+        .top-nav .nav a.logout-btn {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+        }
+
+        .top-nav .nav a.logout-btn:hover {
+            background: rgba(255, 107, 107, 1);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top-nav">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logobitmap.png') }}" alt="Logo Diklat">
+            <h1>Diklat Otomotif STN</h1>
+        </div>
+        <nav class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/documents">Dokumen</a>
+            <a href="/references">Kumpulan Referensi</a>
+            <a href="/api/chat/page" class="active">Tanya Jawab</a>
+            <a href="/dashboard/profile">Profil</a>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </nav>
+    </header>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Chat Container -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm" style="display: flex; flex-direction: column;">
+                    <!-- Header -->
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div style="flex: 1; min-width: 0;">
+                                <h5 class="mb-1"><i class="fas fa-robot"></i> Asisten Teknis AI</h5>
+                                <small style="opacity: 0.9; display: block; word-break: break-word;">🔍 Chroma ✓ | 🤖
+                                    Groq AI</small>
+                            </div>
+                            <div class="ms-3">
+                                <span class="badge bg-success" id="chromaStatus" title="Chroma Cloud Vector Database">
+                                    <i class="fas fa-database"></i> Chroma Ready
+                                </span>
+                            </div>
+                            <button class="btn btn-sm btn-warning ms-2" onclick="clearChatHistory()"
+                                title="Hapus riwayat chat">
+                                <i class="fas fa-trash-alt"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages Area -->
+                    <div class="card-body overflow-auto flex-grow-1" id="chatMessages">
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-comments"
+                                    style="font-size: 4rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>
+                            </div>
+                            <p class="text-muted">Mulai dengan mengajukan pertanyaan tentang kendaraan atau teknis
+                                bengkel</p>
+                            <div id="suggestedQuestions" class="mt-4"></div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="loadingIndicator" class="text-center py-4"
+                        style="display: none; background: rgba(248, 249, 250, 0.5);">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <small class="text-muted ms-2" style="display: inline-block;">
+                            <i class="fas fa-search"></i> Sedang mencari dokumen yang relevan...
+                        </small>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="card-footer border-top"
+                        style="background: rgba(248, 249, 250, 0.6); border-top: 1px solid rgba(102, 126, 234, 0.1) !important; padding: 1.2rem;">
+                        <form id="chatForm" onsubmit="sendQuestion(event)">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="questionInput"
+                                    placeholder="🔍 Tanya tentang mesin, perawatan, atau teknis bengkel... (contoh: Cara ganti oli)"
+                                    autocomplete="off">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-paper-plane"></i> Kirim
+                                </button>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-info-circle"></i> Tips: Pertanyaan yang spesifik akan memberikan
+                                jawaban yang lebih akurat
+                            </small>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar - Topics & Tips -->
+            <div class="col-lg-4">
+                <!-- Topics Panel - Dynamic dari database -->
+                <div class="card shadow-sm mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0"><i class="fas fa-layer-group"></i> Topik Materi</h6>
+                    </div>
+                    <div class="card-body px-2 py-2" id="topicsPanel" style="max-height: none; overflow-y: visible;">
+                        <div id="topicsLoading" class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-success" role="status">
+                                <span class="visually-hidden">Memuat topik...</span>
+                            </div>
+                            <small class="text-muted ms-2">Memuat topik materi...</small>
+                        </div>
+                        <div id="topicsList" style="display: none;">
+                            <!-- Topics will be populated here dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Questions -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-header bg-warning text-white">
+                        <h6 class="mb-0"><i class="fas fa-bolt"></i> Pertanyaan Cepat</h6>
+                    </div>
+                    <div class="card-body p-3" id="quickQuestions">
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2 text-start"
+                            onclick="quickAsk('Bagaimana cara perawatan berkala kendaraan?')">
+                            <i class="fas fa-wrench"></i> Perawatan Berkala
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2 text-start"
+                            onclick="quickAsk('Berapa interval penggantian oli standar?')">
+                            <i class="fas fa-hourglass-half"></i> Interval Oli
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm w-100 mb-2 text-start"
+                            onclick="quickAsk('Apa tanda-tanda clutch yang perlu diganti?')">
+                            <i class="fas fa-exclamation-triangle"></i> Tanda Clutch Rusak
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm w-100 text-start"
+                            onclick="quickAsk('Bagaimana cara membaca kode error OBD?')">
+                            <i class="fas fa-bug"></i> Baca Kode Error
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global state
+        let isLoading = false;
+
+        // Get CSRF token from meta tag
+        function getCsrfToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            loadChatHistory();
+            loadSuggestedQuestions();
+            loadTopicsPanel();
+            checkChromaHealth();
+            initializeDokumenBengkelLink();
+        });
+
+        // Check Chroma Vector Database health
+        async function checkChromaHealth() {
+            try {
+                const response = await fetch('/api/chat/health');
+                const data = await response.json();
+
+                const statusEl = document.getElementById('chromaStatus');
+                if (data.status === 'ok' && data.search_available) {
+                    statusEl.innerHTML = '<i class="fas fa-database"></i> Chroma ✓';
+                    statusEl.className = 'badge bg-success';
+                } else {
+                    statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Chroma Offline';
+                    statusEl.className = 'badge bg-warning';
+                }
+            } catch (error) {
+                console.error('Error checking Chroma health:', error);
+            }
+        }
+
+        // Load suggested questions
+        async function loadSuggestedQuestions() {
+            try {
+                const response = await fetch('/api/chat/suggest-questions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const suggestionsHtml = data.suggestions.umum
+                        .slice(0, 3)
+                        .map(q => `<button class="btn btn-outline-secondary btn-sm mb-2 w-100" onclick="quickAsk('${q.replace(/'/g, "\\'")}')">${q}</button>`)
+                        .join('');
+
+                    document.getElementById('suggestedQuestions').innerHTML = suggestionsHtml;
+                }
+            } catch (error) {
+                console.error('Error loading suggestions:', error);
+            }
+        }
+
+        // Load topics from database
+        async function loadTopicsPanel() {
+            try {
+                const response = await fetch('/api/chat/topics');
+                const data = await response.json();
+
+                if (data.success && data.topics) {
+                    const topicsList = document.getElementById('topicsList');
+                    let html = '<div class="d-grid gap-2">';
+
+                    data.topics.forEach(topic => {
+                        const displayText = topic.examples[0] || topic.label;
+                        html += `
+                    <button
+                        class="btn btn-sm btn-outline-primary text-start"
+                        onclick="expandTopic('${topic.id}', ${JSON.stringify(topic).replace(/"/g, '&quot;')})"
+                        title="${topic.description}"
+                        style="justify-content: flex-start; padding: 8px 10px; font-weight: 500;">
+                        <i class="fas ${topic.icon} me-2" style="width: 16px; text-align: center;"></i>
+                        <span style="font-size: 0.9rem;">${topic.label}</span>
+                    </button>
+                `;
+                    });
+
+                    html += '</div>';
+
+                    // Hide loading, show topics
+                    document.getElementById('topicsLoading').style.display = 'none';
+                    topicsList.innerHTML = html;
+                    topicsList.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading topics:', error);
+                document.getElementById('topicsLoading').innerHTML = '<p class="text-muted"><small>Gagal memuat topik</small></p>';
+            }
+        }
+
+        // Expand topic and show examples
+        function expandTopic(topicId, topic) {
+            // Create a modal or dropdown to show examples
+            let examplesHtml = topic.examples
+                .map(ex => `<button class="btn btn-sm btn-light w-100 text-start mb-2" onclick="quickAsk('${ex.replace(/'/g, "\\'")}')">${ex}</button>`)
+                .join('');
+
+            // Show in a simple alert-like display or use a popover
+            const topicPanel = document.getElementById('topicsPanel');
+            topicPanel.innerHTML = `
+        <div class="mb-3">
+            <button class="btn btn-link btn-sm mb-3" onclick="loadTopicsPanel()">
+                <i class="fas fa-arrow-left"></i> Kembali ke Topik
+            </button>
+        </div>
+        <h6 class="mb-2"><i class="fas ${topic.icon}"></i> ${topic.label}</h6>
+        <p class="text-muted small mb-3">${topic.description}</p>
+        <p class="small fw-bold mb-2">Contoh pertanyaan:</p>
+        <div class="d-grid gap-2">
+            ${examplesHtml}
+        </div>
+    `;
+        }
+
+        // Send question
+        async function sendQuestion(event) {
+            event.preventDefault();
+
+            const input = document.getElementById('questionInput');
+            const question = input.value.trim();
+
+            if (!question) {
+                alert('Silakan masukkan pertanyaan!');
+                return;
+            }
+
+            if (isLoading) {
+                alert('Tunggu sampai pertanyaan sebelumnya selesai diproses');
+                return;
+            }
+
+            // Add user message to chat
+            addMessageToChat('user', question);
+            input.value = '';
+
+            // Reload topics after asking to reset
+            setTimeout(() => loadTopicsPanel(), 500);
+
+            // Show loading
+            isLoading = true;
+            document.getElementById('loadingIndicator').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/chat/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        use_documents: true,
+                        search_limit: 5
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.answer) {
+                    addMessageToChat('assistant', data.answer, data.sources);
+                    currentSources = data.sources || [];
+                    // Sources panel removed
+                } else {
+                    addMessageToChat('assistant', `❌ Maaf, terjadi kesalahan: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessageToChat('assistant', '❌ Terjadi kesalahan dalam menghubungi server. Silakan coba lagi.');
+            } finally {
+                isLoading = false;
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        // Add message to chat UI
+        function addMessageToChat(role, content, sources = null) {
+            const chatContainer = document.getElementById('chatMessages');
+
+            // Clear placeholder if needed
+            if (chatContainer.querySelector('.text-center')) {
+                chatContainer.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${role}-message`;
+
+            let contentHtml = `<div class="message-content">
+        ${escapeHtml(content).replace(/\n/g, '<br>')}
+    `;
+
+            // Add sources if available
+            if (sources && sources.length > 0) {
+                contentHtml += '<div class="mt-3">';
+                sources.slice(0, 3).forEach(source => {
+                    const sourceName = source.name || source.file_name || 'Dokumen';
+                    const sourceLink = source.link || `https://drive.google.com/file/d/${source.file_id}/view`;
+                    contentHtml += `
+                <a href="${sourceLink}" target="_blank" class="source-badge">
+                    <i class="fas fa-book"></i> ${sourceName.substring(0, 30)} (${Math.round((source.relevance || 0) * 100)}%)
+                </a>
+            `;
+                });
+                contentHtml += '</div>';
+            }
+
+            contentHtml += `<div class="message-time">${new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</div>
+    </div>`;
+
+            messageDiv.innerHTML = contentHtml;
+            chatContainer.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Quick ask
+        function quickAsk(question) {
+            document.getElementById('questionInput').value = question;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Initialize Dokumen Bengkel link saat halaman dimuat
+        function initializeDokumenBengkelLink() {
+            // Fetch Dokumen Bengkel folder info dari backend melalui endpoint chat health
+            // Atau langsung buat link berdasarkan folder name search
+            fetch('/api/chat/health')
+                .then(resp => resp.json())
+                .then(data => {
+                    // Folder akan ditampilkan saat ada sumber hasil pencarian
+                    // Untuk sekarang tampilkan di initial state jika ada
+                })
+                .catch(err => console.log('Info: Dokumen Bengkel akan ditampilkan saat ada hasil pencarian'));
+        }
+
+        // Load chat history
+        async function loadChatHistory() {
+            try {
+                const response = await fetch('/api/chat/history?limit=10');
+                const data = await response.json();
+
+                if (data.success && data.history.length > 0) {
+                    const chatContainer = document.getElementById('chatMessages');
+                    chatContainer.innerHTML = '';
+
+                    data.history.forEach(msg => {
+                        addMessageToChat(msg.role, msg.content, msg.sources);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        // Clear chat history
+        async function clearChatHistory() {
+            if (!confirm('Apakah Anda yakin ingin menghapus riwayat chat?')) {
+                return;
+            }
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const response = await fetch('/api/chat/history/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('chatMessages').innerHTML = `
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <i class="fas fa-comment-dots" style="font-size: 3rem; color: #ccc;"></i>
+                    </div>
+                    <p class="text-muted">Mulai dengan mengajukan pertanyaan tentang kendaraan atau teknis bengkel</p>
+                </div>
+            `;
+                    alert('Riwayat chat telah dihapus');
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Gagal menghapus riwayat: ' + error.message);
+            }
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+
+</html>

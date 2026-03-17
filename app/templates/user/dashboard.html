@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diklat Otomotif STN - Dashboard Peserta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2a5298);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR NAVIGATION */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 20px 15px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar-logo img {
+            height: 150px;
+            width: auto;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .sidebar-logo h2 {
+            font-size: 20px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
+            border-left-color: #4facfe;
+        }
+
+        .sidebar-menu a span {
+            margin-left: 12px;
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.85;
+            margin: 0;
+        }
+
+        .user-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .content-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #4facfe;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(79, 172, 254, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .module {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .module h3 {
+            color: #4facfe;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .module h4 {
+            color: #fff;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .module ul {
+            padding-left: 20px;
+        }
+
+        .module li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .module a {
+            color: #00f2fe;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .module a:hover {
+            color: #4facfe;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 5px 0;
+            transition: opacity 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #00f2fe;
+            color: #00f2fe;
+            padding: 8px 18px;
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 242, 254, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            font-size: 13px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.6;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+
+            .main-content {
+                margin-left: 250px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .modules {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                gap: 10px;
+                overflow-x: auto;
+                padding: 10px 20px;
+            }
+
+            .sidebar-menu li {
+                flex-shrink: 0;
+            }
+
+            .sidebar-menu a {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+
+            .sidebar-footer {
+                display: none;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- SIDEBAR NAVIGATION -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ url_for('static', filename='images/logobitmap.png') }}" alt="Logo Diklat">
+            </div>
+
+            <ul class="sidebar-menu">
+                <li>
+                    <a href="/dashboard" class="active">
+                        <span style="font-size: 18px;">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/documents">
+                        <span style="font-size: 18px;">📁</span>
+                        <span>Dokumen Bengkel</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/references">
+                        <span style="font-size: 18px;">📘</span>
+                        <span>Kumpulan Referensi</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/api/chat/page">
+                        <span style="font-size: 18px;">💬</span>
+                        <span>Tanya Jawab</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/dashboard/profile">
+                        <span style="font-size: 18px;">👤</span>
+                        <span>Profil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/logout" style="color: rgba(255,107,107,0.8);">
+                        <span style="font-size: 18px;">🚪</span>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <p>Diklat Otomotif STN</p>
+                <p style="font-size: 11px; margin-top: 8px;">Batch: {{ peserta.batch }}</p>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <header>
+                <div class="header-title">
+                    <h1>🔧 DIKLAT STN</h1>
+                    <p>Selamat Datang, {{ peserta.nama }}!</p>
+                </div>
+                <div class="user-info">
+                    <strong>{{ peserta.batch }}</strong><br>
+                    <small>Status: {{ peserta.status_pembayaran }}</small>
+                </div>
+            </header>
+
+            <div class="content-sections">
+                <!-- INFORMASI PESERTA -->
+                <section>
+                    <h2 class="section-title">👤 Informasi Peserta</h2>
+                    <div class="modules" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="module">
+                            <h3>Data Diri</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                <li><strong>Nama:</strong> {{ peserta.nama }}</li>
+                                <li><strong>Batch:</strong> {{ peserta.batch }}</li>
+                                <li><strong>Status:</strong> {{ peserta.status_pembayaran }}</li>
+                            </ul>
+                        </div>
+                        <div class="module">
+                            <h3>Akses</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                <li><strong>Workshop:</strong>
+                                    {% if peserta.akses_workshop %}
+                                    <span style="color: #4caf50;">✓ Aktif</span>
+                                    {% else %}
+                                    <span style="color: #f44336;">✗ Non-Aktif</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>Dokumen Bengkel:</strong>
+                                    {% if peserta.akses_dokumen_bengkel %}
+                                    <span style="color: #4caf50;">✓ Ya</span>
+                                    {% else %}
+                                    <span style="color: #f44336;">✗ Tidak</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PENGUMUMAN & JADWAL -->
+                <section>
+                    <h2 class="section-title">📢 Pengumuman & Jadwal</h2>
+                    <div class="modules" style="grid-template-columns: 1fr 1fr;">
+                        <div class="module">
+                            <h3>Pengumuman</h3>
+                            {% if announcements %}
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                {% for ann in announcements %}
+                                <div
+                                    style="background: rgba(255,255,255,0.05); padding: 12px; margin-bottom: 10px; border-left: 4px solid #00f2fe; border-radius: 4px; font-size: 13px;">
+                                    <h4 style="color: #4facfe; margin-bottom: 5px; font-size: 14px;">{{ ann.judul }}
+                                    </h4>
+                                    <p style="line-height: 1.4; margin-bottom: 5px;">{{ ann.isi }}</p>
+                                    <small style="color: #aaa;">{{ ann.tanggal_dibuat.strftime('%d-%m-%Y %H:%M')
+                                        }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p style="color: #aaa; font-style: italic; font-size: 13px;">Tidak ada pengumuman saat ini.
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <div class="module">
+                            <h3>🗓 Jadwal Mingguan</h3>
+                            <ul style="list-style: none; padding: 0;">
+                                {% for item in weekly_schedule %}
+                                <div
+                                    style="padding: 10px; background: rgba(255,255,255,0.05); margin-bottom: 8px; border-radius: 4px; font-size: 13px;">
+                                    <strong>{{ item.day }}</strong><br>
+                                    <span style="color: #4facfe;">{{ item.time }}</span> — {{ item.topic }}
+                                </div>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PEMBAYARAN & PENGATURAN -->
+                <section>
+                    <h2 class="section-title">⚙️ Manajemen Akun</h2>
+                    <div class="modules" style="grid-template-columns: 1fr 1fr;">
+                        <div class="module">
+                            <h3>💳 Konfirmasi Pembayaran</h3>
+                            <p style="font-size: 13px; margin-bottom: 15px;">Unggah bukti transfer (png/jpg/pdf). Status
+                                akan menjadi "Menunggu".</p>
+                            <form action="/dashboard/upload-payment" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <div class="form-group">
+                                    <input type="file" name="proof" accept="image/*,.pdf" required
+                                        style="padding: 8px;">
+                                </div>
+                                <button type="submit" class="btn">Unggah Bukti</button>
+                            </form>
+                        </div>
+
+                        <div class="module">
+                            <h3>🔐 Ganti Password</h3>
+                            <form action="/dashboard/change-password" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <div class="form-group">
+                                    <input type="password" name="current_password" placeholder="Password sekarang"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="new_password" placeholder="Password baru" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" name="confirm_password" placeholder="Konfirmasi password"
+                                        required>
+                                </div>
+                                <button type="submit" class="btn">Ganti Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <footer>
+                    <p>Diklat Otomotif STN • Hanya untuk Peserta Terdaftar</p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Peserta</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f5f7fb; color:#222 }
+        .container { max-width:800px; margin:30px auto; padding:20px; background:#fff; border-radius:8px }
+        label { display:block; margin-top:10px }
+        input, textarea { width:100%; padding:8px; margin-top:6px }
+        .btn { display:inline-block; margin-top:12px; padding:10px 16px; background:#2a5298; color:#fff; border-radius:6px; text-decoration:none }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Profil Peserta</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="color:green">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+        <form method="POST" action="/dashboard/profile">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>Nama</label>
+            <input type="text" name="nama" value="{{ peserta.nama }}" readonly>
+
+            <label>Nama Bengkel</label>
+            <input type="text" name="nama_bengkel" value="{{ peserta.nama_bengkel or '' }}">
+
+            <label>Alamat Bengkel</label>
+            <textarea name="alamat_bengkel">{{ peserta.alamat_bengkel or '' }}</textarea>
+
+            <label>Alamat Rumah</label>
+            <textarea name="alamat">{{ peserta.alamat or '' }}</textarea>
+
+            <button type="submit" class="btn">Simpan Perubahan</button>
+            <a href="/dashboard" class="btn" style="background:#777; margin-left:10px">Kembali</a>
+        </form>
+    </div>
+</body>
+</html>

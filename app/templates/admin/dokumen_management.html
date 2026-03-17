@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelola Dokumen Bengkel - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>🏢 Kelola Dokumen Bengkel</h1>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Total Akses Diberikan</h5>
+                    <h2 class="text-primary">{{ total_akses }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Akses Per Batch/Grup</h5>
+                    <h2 class="text-success">{{ akses_group }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <h5 class="card-title">👤 Akses Individual</h5>
+                    <h2 class="text-info">{{ akses_individual }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <h5 class="card-title">🔄 Status Sync</h5>
+                    {% if latest_sync %}
+                        {% if latest_sync.status == 'success' %}
+                            <span class="badge badge-success">✅ Sukses</span>
+                        {% else %}
+                            <span class="badge badge-danger">❌ Gagal</span>
+                        {% endif %}
+                        <small class="text-muted d-block mt-2">
+                            {{ latest_sync.tanggal_sync.strftime('%d/%m/%Y %H:%M') }}
+                        </small>
+                    {% else %}
+                        <span class="badge badge-secondary">Belum ada</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🎯 Menu Utama</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('main.admin_dokumen_batch') }}" class="btn btn-lg btn-success mr-2 mb-2">
+                        <i class="fas fa-users"></i> Kelola Akses Per Batch
+                    </a>
+                    <a href="{{ url_for('main.admin_dokumen_individual') }}" class="btn btn-lg btn-info mr-2 mb-2">
+                        <i class="fas fa-user"></i> Kelola Akses Individual
+                    </a>
+                    <button onclick="triggerManualSync()" class="btn btn-lg btn-warning mb-2">
+                        <i class="fas fa-sync"></i> Sinkronisasi Google Drive Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Information -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🔄 Informasi Sinkronisasi Google Drive</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Status:</strong> <span id="sync-status-text">Memuat...</span></p>
+                    <p><strong>Jadwal:</strong> Setiap hari Minggu pukul 02:00 pagi (otomatis)</p>
+                    <p><strong>Folder Sinkronisasi:</strong></p>
+                    <ul>
+                        <li>📚 EBOOKS - Koleksi e-book teknis</li>
+                        <li>🧠 Pengetahuan - Materi pembelajaran</li>
+                        <li>🔧 Service Manual (1) - Manual servis bagian 1</li>
+                        <li>⚙️ Service Manual (2) - Manual servis bagian 2</li>
+                    </ul>
+
+                    {% if latest_sync %}
+                    <div class="alert alert-info">
+                        <h6>📊 Hasil Sinkronisasi Terakhir:</h6>
+                        <ul>
+                            <li>Tanggal: {{ latest_sync.tanggal_sync.strftime('%d/%m/%Y %H:%M:%S') }}</li>
+                            <li>Status: <strong>{{ latest_sync.status.upper() }}</strong></li>
+                            <li>Folder Baru: {{ latest_sync.folder_baru }}</li>
+                            <li>File Baru: {{ latest_sync.file_baru }}</li>
+                            <li>Durasi: {{ "%.2f"|format(latest_sync.durasi_detik) }} detik</li>
+                            {% if latest_sync.error_message %}
+                            <li>Error: <span class="text-danger">{{ latest_sync.error_message }}</span></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Batch List for Quick Access -->
+    {% if batches %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📋 Daftar Batch/Grup (Quick Access)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nama Batch</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for batch in batches %}
+                                <tr>
+                                    <td>{{ batch.nama }}</td>
+                                    <td>
+                                        <a href="{{ url_for('main.admin_dokumen_batch') }}#batch-{{ batch.id }}" 
+                                           class="btn btn-sm btn-primary">
+                                            Kelola Akses
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 1rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+function triggerManualSync() {
+    if (!confirm('Apakah Anda yakin ingin memulai sinkronisasi Google Drive sekarang?')) {
+        return;
+    }
+
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sinkronisasi sedang berjalan...';
+
+    fetch('{{ url_for("main.admin_manual_sync") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            // Refresh sync status
+            loadSyncStatus();
+        } else {
+            alert('❌ Error: ' + data.error);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync"></i> Sinkronisasi Google Drive Sekarang';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Terjadi kesalahan: ' + error);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-sync"></i> Sinkronisasi Google Drive Sekarang';
+    });
+}
+
+function loadSyncStatus() {
+    fetch('{{ url_for("main.admin_sync_status") }}')
+    .then(response => response.json())
+    .then(data => {
+        if (data.logs && data.logs.length > 0) {
+            const latest = data.logs[0];
+            document.getElementById('sync-status-text').innerHTML = 
+                `${latest.status.toUpperCase()} - ${latest.tanggal}`;
+        }
+    });
+}
+
+// Load sync status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSyncStatus();
+});
+</script>
+{% endblock %}

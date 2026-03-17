@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi Pembayaran</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: #1a3a6c;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: #2a5298;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-menunggu {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .status-lunas {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .status-ditolak {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .form-inline {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-verify {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-reject {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-pending {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .link-file {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .link-file:hover {
+            text-decoration: underline;
+        }
+
+        .back {
+            margin-top: 20px;
+        }
+
+        .back a {
+            background: #666;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .alert {
+            background: #c8e6c9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>💳 Verifikasi Pembayaran</h1>
+            <p>Kelola dan verifikasi bukti transfer peserta</p>
+        </header>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert">{{ messages[0] }}</div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="controls">
+            <div class="filter-group">
+                <select onchange="window.location.href='/admin/pembayaran?status=' + this.value">
+                    <option value="menunggu" {% if status_filter=='menunggu' %}selected{% endif %}>⏳ Menunggu Verifikasi
+                    </option>
+                    <option value="lunas" {% if status_filter=='lunas' %}selected{% endif %}>✓ Lunas</option>
+                    <option value="ditolak" {% if status_filter=='ditolak' %}selected{% endif %}>✗ Ditolak</option>
+                    <option value="semua" {% if status_filter=='semua' %}selected{% endif %}>Semua</option>
+                </select>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Peserta</th>
+                    <th>WhatsApp</th>
+                    <th>Batch</th>
+                    <th>Status</th>
+                    <th>Bukti Transfer</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in peserta %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ p.nama }}</strong></td>
+                    <td>{{ p.whatsapp }}</td>
+                    <td>{{ p.batch }}</td>
+                    <td>
+                        {% if p.status_pembayaran == 'Menunggu' %}
+                        <span class="status-menunggu">⏳ Menunggu</span>
+                        {% elif p.status_pembayaran == 'Lunas' %}
+                        <span class="status-lunas">✓ Lunas</span>
+                        {% elif p.status_pembayaran == 'Ditolak' %}
+                        <span class="status-ditolak">✗ Ditolak</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.payment_proof %}
+                        <a href="/uploads/{{ p.payment_proof }}" target="_blank" class="link-file">📄 Lihat File</a>
+                        {% else %}
+                        <span style="color: #999;">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="form-inline">
+                            {% if p.status_pembayaran != 'Lunas' %}
+                            <form method="POST" action="/admin/peserta/{{ p.id }}/verifikasi" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="status" value="Lunas">
+                                <button type="submit" class="btn btn-verify" title="Setujui pembayaran">✓ Lunas</button>
+                            </form>
+                            {% endif %}
+                            {% if p.status_pembayaran != 'Ditolak' %}
+                            <form method="POST" action="/admin/peserta/{{ p.id }}/verifikasi" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="status" value="Ditolak">
+                                <button type="submit" class="btn btn-reject" title="Tolak pembayaran">✗ Tolak</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if peserta|length == 0 %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <p>📭 Tidak ada pembayaran untuk ditampilkan</p>
+        </div>
+        {% endif %}
+
+        <div class="back">
+            <a href="/admin/dashboard">← Kembali ke Dashboard</a>
+        </div>
+    </div>
+</body>
+
+</html>
